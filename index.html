@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Virtual Attendance System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Login Page -->
+        <div id="login-page" class="page active">
+            <div class="login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h1>🎓 Real-Time Attendance System</h1>
+                        <p>Virtual Face Recognition Attendance Management</p>
+                    </div>
+                    <form id="login-form" class="login-form">
+                        <div class="form-group">
+                            <label for="username">👤 Username</label>
+                            <input type="text" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">🔒 Password</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="role">👥 Role</label>
+                            <select id="role" name="role" required>
+                                <option value="">Select Role</option>
+                                <option value="admin">Admin</option>
+                                <option value="faculty">Faculty</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                    <div class="demo-credentials">
+                        <h4>Demo Credentials:</h4>
+                        <p><strong>Admin:</strong> admin / admin123</p>
+                        <p><strong>Faculty:</strong> faculty / faculty123</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav id="navbar" class="navbar hidden">
+            <div class="nav-brand">
+                <h2>🎓 Live Attendance System</h2>
+                <span id="live-indicator" class="live-indicator">🔴 LIVE</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#" data-page="dashboard" class="nav-link active">📊 Dashboard</a>
+                <a href="#" data-page="student-registration" class="nav-link">🧑‍🎓 Students</a>
+                <a href="#" data-page="take-attendance" class="nav-link">📅 Take Attendance</a>
+                <a href="#" data-page="live-attendance" class="nav-link">🔴 Live View</a>
+                <a href="#" data-page="attendance-report" class="nav-link">📈 Reports</a>
+                <a href="#" data-page="search-student" class="nav-link">🔍 Search</a>
+                <a href="#" data-page="faculty-management" class="nav-link admin-only">🧑‍🏫 Faculty</a>
+                <a href="#" data-page="settings" class="nav-link">⚙️ Settings</a>
+                <a href="#" id="logout-btn" class="nav-link">🚪 Logout</a>
+            </div>
+            <div class="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <div class="header-content">
+                        <h1>📊 Real-Time Dashboard</h1>
+                        <p id="welcome-message">Welcome to your attendance system!</p>
+                        <div class="live-stats">
+                            <span id="current-time" class="current-time"></span>
+                            <span id="active-sessions" class="active-sessions">🟢 System Active</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <h3 id="total-students">0</h3>
+                            <p>Total Students</p>
+                            <small id="students-change" class="change-indicator">No data yet</small>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <h3 id="today-attendance">0</h3>
+                            <p>Today's Attendance</p>
+                            <small id="attendance-change" class="change-indicator">Start taking attendance</small>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🧑‍🏫</div>
+                        <div class="stat-info">
+                            <h3 id="total-faculty">0</h3>
+                            <p>Faculty Members</p>
+                            <small id="faculty-change" class="change-indicator">Add faculty members</small>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <h3 id="attendance-rate">0%</h3>
+                            <p>Today's Rate</p>
+                            <small id="rate-change" class="change-indicator">Data will appear</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>🔴 Live Attendance Feed</h3>
+                            <span class="refresh-indicator" id="feed-refresh">Updated just now</span>
+                        </div>
+                        <div id="live-feed" class="live-feed">
+                            <div class="no-data">
+                                <p>📱 No live attendance data yet</p>
+                                <p>Start taking attendance to see real-time updates here</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>📈 Quick Statistics</h3>
+                            <select id="stats-period" class="period-selector">
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+                        <div id="quick-stats" class="quick-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Present</span>
+                                <span class="stat-value" id="present-count">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Absent</span>
+                                <span class="stat-value" id="absent-count">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Late</span>
+                                <span class="stat-value" id="late-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Registration Page -->
+        <div id="student-registration-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>🧑‍🎓 Student Management</h1>
+                    <div class="header-actions">
+                        <button id="bulk-import-btn" class="btn btn-secondary">📄 Bulk Import</button>
+                        <button id="add-student-btn" class="btn btn-primary">➕ Add Student</button>
+                    </div>
+                </div>
+
+                <div class="search-bar-section">
+                    <div class="search-controls">
+                        <input type="text" id="student-filter" placeholder="Search students by name, roll number, or department..." class="search-input">
+                        <select id="department-filter" class="filter-select">
+                            <option value="">All Departments</option>
+                        </select>
+                        <select id="class-filter" class="filter-select">
+                            <option value="">All Classes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="students-header">
+                        <h3>Students List <span id="student-count" class="count-badge">0</span></h3>
+                        <div class="view-options">
+                            <button class="view-btn active" data-view="grid">⊞ Grid</button>
+                            <button class="view-btn" data-view="list">☰ List</button>
+                        </div>
+                    </div>
+                    <div class="students-grid" id="students-grid">
+                        <div class="empty-state">
+                            <div class="empty-icon">🧑‍🎓</div>
+                            <h3>No Students Added Yet</h3>
+                            <p>Click "Add Student" to register your first student</p>
+                            <button class="btn btn-primary" onclick="document.getElementById('add-student-btn').click()">
+                                ➕ Add First Student
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Student Modal -->
+                <div id="student-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>➕ Add New Student</h2>
+                            <span class="close">&times;</span>
+                        </div>
+                        <form id="student-form" class="form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="student-name">Full Name *</label>
+                                    <input type="text" id="student-name" required placeholder="Enter student's full name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="student-roll">Roll Number *</label>
+                                    <input type="text" id="student-roll" required placeholder="e.g., CS001, MATH001">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="student-department">Department *</label>
+                                    <select id="student-department" required>
+                                        <option value="">Select Department</option>
+                                        <option value="Computer Science">Computer Science</option>
+                                        <option value="Mathematics">Mathematics</option>
+                                        <option value="Physics">Physics</option>
+                                        <option value="Chemistry">Chemistry</option>
+                                        <option value="Biology">Biology</option>
+                                        <option value="English">English</option>
+                                        <option value="History">History</option>
+                                        <option value="Economics">Economics</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="student-class">Class/Section *</label>
+                                    <input type="text" id="student-class" required placeholder="e.g., CS-101, Math-A">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="student-email">Email</label>
+                                    <input type="email" id="student-email" placeholder="student@example.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="student-phone">Phone Number</label>
+                                    <input type="tel" id="student-phone" placeholder="+1234567890">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="student-photo">Face Photo for Recognition</label>
+                                <div class="photo-upload-section">
+                                    <input type="file" id="student-photo" accept="image/*" class="file-input">
+                                    <button type="button" id="capture-photo-btn" class="btn btn-secondary">📷 Capture from Camera</button>
+                                    <div id="photo-preview" class="photo-preview hidden">
+                                        <img id="preview-image" src="/placeholder.svg" alt="Student Photo">
+                                        <button type="button" class="remove-photo">✕</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="attendanceSystem.closeModal('student-modal')">Cancel</button>
+                                <button type="submit" class="btn btn-primary">💾 Save Student</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Take Attendance Page -->
+        <div id="take-attendance-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>📅 Take Attendance</h1>
+                    <div class="header-info">
+                        <span id="attendance-date" class="date-display"></span>
+                        <span id="attendance-time" class="time-display"></span>
+                    </div>
+                </div>
+
+                <div class="attendance-container">
+                    <div class="camera-section">
+                        <div class="camera-container">
+                            <video id="camera-feed" autoplay muted playsinline></video>
+                            <canvas id="camera-canvas" style="display: none;"></canvas>
+                            <div id="camera-placeholder" class="camera-placeholder">
+                                <div class="camera-icon">📷</div>
+                                <p>Click "Start Camera" to begin face recognition</p>
+                                <p class="camera-help">Make sure you have good lighting</p>
+                            </div>
+                            <div id="face-detection-overlay" class="face-detection-overlay hidden">
+                                <div class="detection-box"></div>
+                                <div class="detection-status">Scanning for faces...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="camera-controls">
+                            <button id="start-camera-btn" class="btn btn-primary">📷 Start Camera</button>
+                            <button id="stop-camera-btn" class="btn btn-secondary hidden">⏹️ Stop Camera</button>
+                            <button id="capture-attendance-btn" class="btn btn-success hidden">✅ Mark Present</button>
+                        </div>
+
+                        <div class="class-selection">
+                            <label for="attendance-class">Select Class/Subject *</label>
+                            <select id="attendance-class" required>
+                                <option value="">Choose Class</option>
+                            </select>
+                            <button id="create-class-btn" class="btn btn-secondary btn-small">➕ Create New Class</button>
+                        </div>
+                    </div>
+
+                    <div class="attendance-info">
+                        <div class="recognition-status">
+                            <h3>🤖 Face Recognition Status</h3>
+                            <div id="recognition-result" class="recognition-result">
+                                <div class="status-indicator">⭕</div>
+                                <p>Camera not started</p>
+                                <div class="confidence-bar hidden">
+                                    <div class="confidence-fill"></div>
+                                    <span class="confidence-text">0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="attendance-list">
+                            <h3>📋 Today's Attendance <span id="attendance-counter" class="counter">0</span></h3>
+                            <div class="attendance-controls">
+                                <button id="mark-manual-btn" class="btn btn-secondary btn-small">✏️ Manual Entry</button>
+                                <button id="export-today-btn" class="btn btn-secondary btn-small">📤 Export Today</button>
+                            </div>
+                            <div id="todays-attendance" class="attendance-items">
+                                <div class="no-attendance">
+                                    <p>No attendance marked yet today</p>
+                                    <p>Start the camera and detect faces to mark attendance</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Attendance View -->
+        <div id="live-attendance-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>🔴 Live Attendance Monitor</h1>
+                    <div class="live-controls">
+                        <button id="auto-refresh-toggle" class="btn btn-secondary active">🔄 Auto Refresh</button>
+                        <button id="sound-toggle" class="btn btn-secondary">🔊 Sound Alerts</button>
+                    </div>
+                </div>
+
+                <div class="live-dashboard">
+                    <div class="live-stats-row">
+                        <div class="live-stat-card">
+                            <h4>🕐 Session Started</h4>
+                            <span id="session-start-time">--:--</span>
+                        </div>
+                        <div class="live-stat-card">
+                            <h4>👥 Students Detected</h4>
+                            <span id="live-detected-count">0</span>
+                        </div>
+                        <div class="live-stat-card">
+                            <h4>✅ Marked Present</h4>
+                            <span id="live-present-count">0</span>
+                        </div>
+                        <div class="live-stat-card">
+                            <h4>⏱️ Last Activity</h4>
+                            <span id="last-activity-time">Never</span>
+                        </div>
+                    </div>
+
+                    <div class="live-feed-container">
+                        <div class="live-feed-header">
+                            <h3>📡 Real-Time Feed</h3>
+                            <div class="feed-controls">
+                                <button id="clear-feed-btn" class="btn btn-small btn-secondary">🗑️ Clear</button>
+                                <button id="pause-feed-btn" class="btn btn-small btn-secondary">⏸️ Pause</button>
+                            </div>
+                        </div>
+                        <div id="realtime-feed" class="realtime-feed">
+                            <div class="feed-item system-message">
+                                <span class="timestamp">Just now</span>
+                                <span class="message">🟢 Live monitoring system started</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Report Page -->
+        <div id="attendance-report-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>📈 Attendance Reports</h1>
+                    <div class="report-actions">
+                        <button id="generate-report-btn" class="btn btn-primary">📊 Generate Report</button>
+                        <button id="schedule-report-btn" class="btn btn-secondary">⏰ Schedule Report</button>
+                    </div>
+                </div>
+
+                <div class="filters-section">
+                    <div class="filters-header">
+                        <h3>🔍 Report Filters</h3>
+                        <button id="clear-filters-btn" class="btn btn-small btn-secondary">Clear All</button>
+                    </div>
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label for="report-date-from">From Date</label>
+                            <input type="date" id="report-date-from">
+                        </div>
+                        <div class="filter-group">
+                            <label for="report-date-to">To Date</label>
+                            <input type="date" id="report-date-to">
+                        </div>
+                        <div class="filter-group">
+                            <label for="report-class">Class</label>
+                            <select id="report-class">
+                                <option value="">All Classes</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="report-student">Student</label>
+                            <input type="text" id="report-student" placeholder="Search student...">
+                        </div>
+                        <div class="filter-group">
+                            <label for="report-status">Status</label>
+                            <select id="report-status">
+                                <option value="">All Status</option>
+                                <option value="Present">Present</option>
+                                <option value="Absent">Absent</option>
+                                <option value="Late">Late</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button id="apply-filters-btn" class="btn btn-primary">Apply Filters</button>
+                            <button id="download-csv-btn" class="btn btn-secondary">📄 CSV</button>
+                            <button id="download-pdf-btn" class="btn btn-secondary">📑 PDF</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-results">
+                    <div class="results-header">
+                        <h3>📋 Report Results</h3>
+                        <span id="results-count" class="results-count">0 records found</span>
+                    </div>
+                    <div class="report-table-container">
+                        <table id="attendance-table" class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Student Name</th>
+                                    <th>Roll Number</th>
+                                    <th>Class</th>
+                                    <th>Status</th>
+                                    <th>Method</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendance-table-body">
+                                <tr class="no-data-row">
+                                    <td colspan="8">
+                                        <div class="no-data">
+                                            <p>📊 No attendance data available</p>
+                                            <p>Start taking attendance to generate reports</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Student Page -->
+        <div id="search-student-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>🔍 Search Students</h1>
+                    <div class="search-stats">
+                        <span id="search-results-count">0 students in database</span>
+                    </div>
+                </div>
+
+                <div class="advanced-search">
+                    <div class="search-controls">
+                        <div class="search-input-group">
+                            <input type="text" id="student-search" placeholder="Search by name, roll number, email, or department..." class="search-input">
+                            <button id="search-btn" class="btn btn-primary">🔍 Search</button>
+                        </div>
+                        <div class="search-filters">
+                            <select id="search-department" class="filter-select">
+                                <option value="">All Departments</option>
+                            </select>
+                            <select id="search-class" class="filter-select">
+                                <option value="">All Classes</option>
+                            </select>
+                            <select id="search-attendance-status" class="filter-select">
+                                <option value="">Any Attendance</option>
+                                <option value="high">High Attendance (≥80%)</option>
+                                <option value="medium">Medium Attendance (60-79%)</option>
+                                <option value="low">Low Attendance (<60%)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="search-results" class="search-results">
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <h3>Search Your Students</h3>
+                        <p>Use the search bar above to find students by name, roll number, or other criteria</p>
+                    </div>
+                </div>
+
+                <!-- Student Profile Modal -->
+                <div id="student-profile-modal" class="modal">
+                    <div class="modal-content large">
+                        <div class="modal-header">
+                            <h2>👤 Student Profile</h2>
+                            <span class="close">&times;</span>
+                        </div>
+                        <div id="student-profile-content" class="student-profile">
+                            <!-- Profile content will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Faculty Management Page -->
+        <div id="faculty-management-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>🧑‍🏫 Faculty Management</h1>
+                    <button id="add-faculty-btn" class="btn btn-primary">➕ Add Faculty</button>
+                </div>
+
+                <div class="faculty-grid" id="faculty-grid">
+                    <div class="empty-state">
+                        <div class="empty-icon">🧑‍🏫</div>
+                        <h3>No Faculty Members Added</h3>
+                        <p>Add faculty members to manage classes and subjects</p>
+                        <button class="btn btn-primary" onclick="document.getElementById('add-faculty-btn').click()">
+                            ➕ Add First Faculty
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add Faculty Modal -->
+                <div id="faculty-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>➕ Add Faculty Member</h2>
+                            <span class="close">&times;</span>
+                        </div>
+                        <form id="faculty-form" class="form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="faculty-name">Full Name *</label>
+                                    <input type="text" id="faculty-name" required placeholder="Enter faculty name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="faculty-id">Faculty ID *</label>
+                                    <input type="text" id="faculty-id" required placeholder="e.g., FAC001">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="faculty-department">Department *</label>
+                                    <select id="faculty-department" required>
+                                        <option value="">Select Department</option>
+                                        <option value="Computer Science">Computer Science</option>
+                                        <option value="Mathematics">Mathematics</option>
+                                        <option value="Physics">Physics</option>
+                                        <option value="Chemistry">Chemistry</option>
+                                        <option value="Biology">Biology</option>
+                                        <option value="English">English</option>
+                                        <option value="History">History</option>
+                                        <option value="Economics">Economics</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="faculty-email">Email</label>
+                                    <input type="email" id="faculty-email" placeholder="faculty@example.com">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="faculty-subjects">Subjects/Classes (one per line)</label>
+                                <textarea id="faculty-subjects" rows="3" placeholder="e.g.&#10;Computer Science 101&#10;Data Structures&#10;Algorithms"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="attendanceSystem.closeModal('faculty-modal')">Cancel</button>
+                                <button type="submit" class="btn btn-primary">💾 Save Faculty</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settings-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>⚙️ System Settings</h1>
+                    <div class="settings-actions">
+                        <button id="export-settings-btn" class="btn btn-secondary">📤 Export Settings</button>
+                        <button id="import-settings-btn" class="btn btn-secondary">📥 Import Settings</button>
+                    </div>
+                </div>
+
+                <div class="settings-sections">
+                    <div class="settings-card">
+                        <h3>📊 Attendance Settings</h3>
+                        <div class="setting-item">
+                            <label for="attendance-threshold">Minimum Attendance Threshold (%)</label>
+                            <input type="number" id="attendance-threshold" min="0" max="100" value="75">
+                            <small>Students below this threshold will be flagged</small>
+                        </div>
+                        <div class="setting-item">
+                            <label for="late-threshold">Late Arrival Threshold (minutes)</label>
+                            <input type="number" id="late-threshold" min="0" value="15">
+                            <small>Mark as late if arrived after this time</small>
+                        </div>
+                        <div class="setting-item">
+                            <label for="auto-mark-absent">Auto-mark Absent After</label>
+                            <select id="auto-mark-absent">
+                                <option value="0">Never</option>
+                                <option value="30">30 minutes</option>
+                                <option value="60">1 hour</option>
+                                <option value="120">2 hours</option>
+                            </select>
+                            <small>Automatically mark students as absent after class time</small>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>🤖 Face Recognition Settings</h3>
+                        <div class="setting-item">
+                            <label for="recognition-model">Recognition Accuracy Level</label>
+                            <select id="recognition-model">
+                                <option value="basic">Basic (Faster)</option>
+                                <option value="advanced">Advanced (Balanced)</option>
+                                <option value="premium">Premium (Most Accurate)</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label for="confidence-threshold">Confidence Threshold (%)</label>
+                            <input type="range" id="confidence-threshold" min="50" max="99" value="85">
+                            <span id="confidence-display">85%</span>
+                            <small>Minimum confidence required for face match</small>
+                        </div>
+                        <div class="setting-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="multiple-faces">
+                                Allow Multiple Face Detection
+                            </label>
+                            <small>Detect multiple students in single frame</small>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>🔔 Notifications & Alerts</h3>
+                        <div class="setting-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="email-notifications" checked>
+                                Email Notifications
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="sound-notifications" checked>
+                                Sound Alerts
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="low-attendance-alerts">
+                                Low Attendance Alerts
+                            </label>
+                            <small>Alert when students fall below attendance threshold</small>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>💾 Data & Backup</h3>
+                        <div class="setting-item">
+                            <label for="backup-frequency">Auto Backup Frequency</label>
+                            <select id="backup-frequency">
+                                <option value="never">Never</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="setting-actions">
+                            <button id="backup-now-btn" class="btn btn-secondary">💾 Backup Now</button>
+                            <button id="restore-backup-btn" class="btn btn-secondary">📥 Restore Backup</button>
+                            <button id="clear-all-data-btn" class="btn btn-danger">🗑️ Clear All Data</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-footer">
+                    <button id="save-settings-btn" class="btn btn-primary">💾 Save All Settings</button>
+                    <button id="reset-settings-btn" class="btn btn-secondary">🔄 Reset to Defaults</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Data Page -->
+        <!-- <div id="export-data-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>📤 Export Data</h1>
+                </div>
+
+                <div class="export-sections">
+                    <div class="export-card">
+                        <h3>👥 Student Data</h3>
+                        <p>Export student information including photos and personal details</p>
+                        <div class="export-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="include-photos" checked>
+                                Include Photos
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="include-attendance-history" checked>
+                                Include Attendance History
+                            </label>
+                        </div>
+                        <button id="export-students-btn" class="btn btn-primary">📄 Export Students (CSV)</button>
+                    </div>
+
+                    <div class="export-card">
+                        <h3>📊 Attendance Reports</h3>
+                        <p>Export attendance data for analysis</p>
+                        <div class="export-filters">
+                            <div class="filter-group">
+                                <label for="export-date-from">From Date:</label>
+                                <input type="date" id="export-date-from">
+                            </div>
+                            <div class="filter-group">
+                                <label for="export-date-to">To Date:</label>
+                                <input type="date" id="export-date-to">
+                            </div>
+                            <div class="filter-group">
+                                <label for="export-class-filter">Class:</label>
+                                <select id="export-class-filter">
+                                    <option value="">All Classes</option>
+                                    <option value="CS101">Computer Science 101</option>
+                                    <option value="MATH201">Mathematics 201</option>
+                                    <option value="PHY301">Physics 301</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="export-buttons">
+                            <button id="export-attendance-csv-btn" class="btn btn-primary">📄 Export CSV</button>
+                            <button id="export-attendance-pdf-btn" class="btn btn-secondary">📑 Export PDF</button>
+                        </div>
+                    </div>
+
+                    <div class="export-card">
+                        <h3>🧑‍🏫 Faculty Data</h3>
+                        <p>Export faculty information and assigned subjects</p>
+                        <button id="export-faculty-btn" class="btn btn-primary">📄 Export Faculty (CSV)</button>
+                    </div>
+
+                    <div class="export-card">
+                        <h3>💾 Complete Backup</h3>
+                        <p>Export all system data as a complete backup</p>
+                        <button id="export-backup-btn" class="btn btn-success">💾 Create Full Backup</button>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
